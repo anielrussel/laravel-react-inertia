@@ -24,6 +24,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import FilterAssets from '@/components/pages/assets/filter-assets';
+import { Paginated } from '@/types/pagination';
+import Pagination from '@/components/pagination';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,11 +46,13 @@ interface Asset {
 }
 
 interface PageProps {
-    assets: Asset[];
+    assets: Paginated<Asset>;
+    filters: any;
 }
 
 export default function Assets() {
-    const { assets: assetData } = usePage().props as unknown as PageProps;
+    const { assets: assetData, filters } = usePage()
+        .props as unknown as PageProps;
 
     const { delete: destroy, processing } = useForm();
 
@@ -68,82 +73,110 @@ export default function Assets() {
         });
     };
 
+    console.log(assetData);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Assets" />
-            <div className="mx-10 mt-10 space-y-4">
+            <div className="mx-10 mt-10 space-y-8">
                 <div className="flex justify-end">
                     <Link href={assets.create()}>
                         <Button>Create New Asset</Button>
                     </Link>
                 </div>
 
+                <FilterAssets filters={filters} />
+
                 <div>
-                    {assetData.length > 0 ? (
-                        <Table>
-                            <TableCaption>A list of all assets.</TableCaption>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-25">ID</TableHead>
-                                    <TableHead className="w-25">
-                                        Image
-                                    </TableHead>
-                                    <TableHead className="w-50">Name</TableHead>
-                                    <TableHead>Model</TableHead>
-                                    <TableHead className="w-26">
-                                        Quantity
-                                    </TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {assetData.map((asset) => (
-                                    <TableRow key={asset.id}>
-                                        <TableCell className="font-medium">
-                                            {asset.id}
-                                        </TableCell>
-                                        <TableCell>
-                                            <img
-                                                src={asset.image}
-                                                alt={asset.name}
-                                                width={60}
-                                            />
-                                        </TableCell>
-                                        <TableCell>{asset.name}</TableCell>
-                                        <TableCell>{asset.model}</TableCell>
-                                        <TableCell>{asset.quantity}</TableCell>
-                                        <TableCell>{asset.price}</TableCell>
-                                        <TableCell>
-                                            {asset.description}
-                                        </TableCell>
-                                        <TableCell className="space-x-2">
-                                            <Link
-                                                href={assets.edit(asset.id).url}
-                                            >
+                    {assetData.data.length > 0 ? (
+                        <>
+                            <Table>
+                                <TableCaption>
+                                    A list of all assets.
+                                </TableCaption>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-25">
+                                            ID
+                                        </TableHead>
+                                        <TableHead className="w-25">
+                                            Image
+                                        </TableHead>
+                                        <TableHead className="w-50">
+                                            Name
+                                        </TableHead>
+                                        <TableHead>Model</TableHead>
+                                        <TableHead className="w-26">
+                                            Quantity
+                                        </TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead>Description</TableHead>
+                                        <TableHead>Action</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {assetData.data.map((asset) => (
+                                        <TableRow key={asset.id}>
+                                            <TableCell className="font-medium">
+                                                {asset.id}
+                                            </TableCell>
+                                            <TableCell>
+                                                {asset.image ? (
+                                                    <img
+                                                        src={asset.image}
+                                                        alt={asset.name}
+                                                        width={60}
+                                                    />
+                                                ) : (
+                                                    ''
+                                                )}
+                                            </TableCell>
+                                            <TableCell>{asset.name}</TableCell>
+                                            <TableCell>{asset.model}</TableCell>
+                                            <TableCell>
+                                                {asset.quantity}
+                                            </TableCell>
+                                            <TableCell>{asset.price}</TableCell>
+                                            <TableCell>
+                                                {asset.description}
+                                            </TableCell>
+                                            <TableCell className="space-x-2">
+                                                <Link
+                                                    href={
+                                                        assets.edit(asset.id)
+                                                            .url
+                                                    }
+                                                >
+                                                    <Button
+                                                        size={'sm'}
+                                                        variant={'secondary'}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                </Link>
                                                 <Button
                                                     size={'sm'}
-                                                    variant={'secondary'}
+                                                    variant={'destructive'}
+                                                    onClick={() => {
+                                                        setSelectedAsset(asset);
+                                                        setIsOpenDeleteModal(
+                                                            true,
+                                                        );
+                                                    }}
                                                 >
-                                                    Edit
+                                                    Delete
                                                 </Button>
-                                            </Link>
-                                            <Button
-                                                size={'sm'}
-                                                variant={'destructive'}
-                                                onClick={() => {
-                                                    setSelectedAsset(asset);
-                                                    setIsOpenDeleteModal(true);
-                                                }}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+
+                            <Pagination
+                                links={assetData.links}
+                                total={assetData.total}
+                            />
+                        </>
                     ) : (
                         <div>
                             <Card>

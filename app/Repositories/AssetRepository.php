@@ -4,15 +4,20 @@ namespace App\Repositories;
 
 use App\DTOs\Assets\CreateAssetDto;
 use App\DTOs\Assets\UpdateAssetDto;
+use App\Filters\AssetFilter;
 use App\Models\Asset;
 use App\Repositories\Contracts\AssetRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
 
 class AssetRepository implements AssetRepositoryInterface
 {
-    public function getAll(): Collection
+    public function getAll(array $filters = [], int $perPage = 10)
     {
-        return Asset::latest()->get();
+        $query = Asset::query();
+
+        // Apply filters using AssetFilter
+        $query = (new AssetFilter($filters))->apply($query);
+
+        return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function getSingle(int $id): ?Asset

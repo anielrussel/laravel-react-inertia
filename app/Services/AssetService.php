@@ -7,7 +7,6 @@ use App\DTOs\Assets\UpdateAssetDto;
 use App\Models\Asset;
 use App\Repositories\Contracts\AssetRepositoryInterface;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
 class AssetService
@@ -19,10 +18,9 @@ class AssetService
         $this->assetRepository = $assetRepository;
     }
 
-    public function getAllAssets(): Collection
+    public function getAllAssets(array $filters = [])
     {
-        // TODO: better to add filters
-        return $this->assetRepository->getAll();
+        return $this->assetRepository->getAll($filters);
     }
 
     public function getSingleAsset(int $id): ?Asset

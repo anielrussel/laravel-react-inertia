@@ -8,6 +8,7 @@ use App\Http\Requests\Assets\AssetCreateRequest;
 use App\Http\Requests\Assets\AssetUpdateRequest;
 use App\Models\Asset;
 use App\Services\AssetService;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -15,12 +16,15 @@ class AssetController extends Controller
 {
     public function __construct(protected AssetService $assetService) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $assets = $this->assetService->getAllAssets();
+        $filters = $request->only(['name', 'model', 'minPrice', 'maxPrice']);
+
+        $assets = $this->assetService->getAllAssets($filters);
 
         return Inertia::render('assets/Assets', [
             'assets' => $assets,
+            'filters' => $filters
         ]);
     }
 
